@@ -11,7 +11,7 @@ class Lecture:
 
 
 @dataclass
-class Unassigned_Lecture:
+class UnassignedLecture:
     lecture_number: int
     class_name: str
     duration: int
@@ -22,7 +22,7 @@ def generate_list_of_lectures(classes): #generates a list of unasigend lectures
     for class_name, durations in classes.items():
         for lecture_number, duration in enumerate(durations, start=1):
             unassigned_lectures.append(
-                Unassigned_Lecture(
+                UnassignedLecture(
                     class_name = class_name,
                     lecture_number = lecture_number,
                     duration = duration,
