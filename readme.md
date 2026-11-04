@@ -134,7 +134,7 @@ Evaluate the performance and quality of the developed scheduling system.
 | Team Member | GitHub Profile | Responsibilities |
 |---|---|---|
 | Lan Jošt Kozole | [@kisko-png](https://github.com/kisko-png) | Coming Soon |
-| Patrik Korenjak | Coming Soon | Coming Soon |
+| Patrik Korenjak | [https://github.com/patkor9](https://github.com/patkor9) | Coming Soon |
 
 ## Task Distribution
 
