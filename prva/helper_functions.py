@@ -1,5 +1,4 @@
 import random
-
 from models import Lecture, UnassignedLecture
 
 
@@ -27,11 +26,6 @@ def find_qualified_teachers(lecture, teachers):
 
 
 def reserve_time_classroom(classroom, lecture, classrooms, used_times):
-    """Pick a random free start time for the lecture in the classroom.
-
-    used_times maps classroom -> list of (start, end) already booked.
-    Returns the chosen start time and books it, or None if nothing fits.
-    """
     duration = lecture.duration
     earliest_start, latest_end = classrooms[classroom]
     last_start = latest_end - duration
@@ -56,11 +50,7 @@ def reserve_time_classroom(classroom, lecture, classrooms, used_times):
 
 
 def generate_random_chromosomes(unassigned_lectures, classrooms, teachers):
-    """Build one random schedule (a list of Lecture objects).
 
-    Classroom bookings never overlap. Teacher overlaps are possible.
-    A lecture that fits in no classroom gets start_time=None, classroom=None.
-    """
     generated_lectures = []
     used_times = {}  # fresh bookings for every generated schedule
 
@@ -117,3 +107,6 @@ def chromosome_decode(chromosome, unassigned_lectures, classrooms_names, teacher
             )
         )
     return lectures
+
+
+#def display_schedule(unassigned_lectures, classrooms_names, teachers_names):
