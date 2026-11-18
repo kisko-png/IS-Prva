@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def teacher_free(teacher, lectures):
     assigned_to_teacher = []
     for lecture in lectures:
@@ -8,11 +11,11 @@ def teacher_free(teacher, lectures):
     time_end_prev = 0
     for lecture in assigned_to_teacher:
         if lecture.start_time < time_end_prev:
-            return True
-        else :
-            time_end_prev = lecture.start_time() + lecture.duration
+            return False
+        time_end_prev = lecture.start_time + lecture.duration
 
-    return False
+    return True
+
 
 def teacher_qualified(teacher, lectures, teachers):
     assigned_to_teacher = []
@@ -40,27 +43,48 @@ def classroom_free(classroom, lectures, classrooms):
     for lecture in assigned_to_classroom:
         if lecture.start_time < time_end_prev:
             return False
-
-
         time_end_prev = lecture.start_time + lecture.duration
-
-        if lecture.teacher > classroom:
+        if time_end_prev > classroom_close:
             return False
+
     return True
 
 
 def schedule_checker(classrooms, lectures, teachers):
     for lecture in lectures:
-        if lecture.start_time < lecture.end_time is None or lecture.classroom is None:
+        if lecture.start_time is None or lecture.classroom is None:
             return False
 
-        for teacher in teachers:
-            if not teacher_free(teacher, lectures):
-                return False
-            if not teacher_qualified(teacher, lectures, teachers):
-                return False
+    for teacher in teachers:
+        if not teacher_free(teacher, lectures):
+            return False
+        if not teacher_qualified(teacher, lectures, teachers):
+            return False
 
-        for classroom in classrooms:
-            if not classroom_free(classroom, lectures, classrooms):
-                return False
+    for classroom in classrooms:
+        if not classroom_free(classroom, lectures, classrooms):
+            return False
+
     return True
+
+
+def all_classes(lectures, classes):
+    counted = {}
+    for lecture in lectures:
+        name = lecture.class_name
+        if name in counted:
+            counted[name] += 1
+        else:
+            counted[name] = 1
+
+    scheduled = []
+    required = []
+    for name in classes:
+        if name in counted:
+            scheduled.append(counted[name])
+        else:
+            scheduled.append(0)
+        required.append(len(classes[name]))
+
+    difference = np.abs(np.array(scheduled) - np.array(required))
+    return difference

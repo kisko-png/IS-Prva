@@ -12,13 +12,13 @@ def txt2dict(path):
             line = line.strip()
             if not line:
                continue
-        name, values = line.split(None, 1)
+            name, values = line.split(None, 1)
 
-        value = (values.replace("“", '"').replace("”", '"')).replace("‘", "'").replace("’", "'")
+            value = (values.replace("“", '"').replace("”", '"')).replace("‘", "'").replace("’", "'")
 
-        try:
-            data[name] = ast.literal_eval(values)
-        except(ValueError, SyntaxError):
-                values = value.strip("[]")
-                data[name] = [item.strip().strip("'\"") for item in values.split(",")]
+            try:
+                data[name] = ast.literal_eval(values)
+            except(ValueError, SyntaxError):
+                    values = value.strip("[]")
+                    data[name] = [item.strip().strip("'\"") for item in values.split(",")]
     return data
