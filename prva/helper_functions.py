@@ -1,6 +1,9 @@
 import random
 from models import Lecture, UnassignedLecture
 
+import matplotlib.pyplot as plt
+from matplotlib import colormaps
+
 
 def generate_list_of_lectures(classes):
     """Generate a list of unassigned lectures from the classes dict."""
@@ -109,4 +112,55 @@ def chromosome_decode(chromosome, unassigned_lectures, classrooms_names, teacher
     return lectures
 
 
-#def display_schedule(unassigned_lectures, classrooms_names, teachers_names):
+
+
+def display_schedule(schedule, classroom_names, teacher_names, group_by="classroom"): #generated with ai
+    """Draw a Gantt chart of a schedule (list of Lecture).
+
+    group_by="classroom" -> one row per classroom (default)
+    group_by="teacher"   -> one row per teacher
+    """
+    rows = classroom_names if group_by == "classroom" else teacher_names
+    row_index = {name: i for i, name in enumerate(rows)}
+
+    class_names = sorted({lec.class_name for lec in schedule})
+    cmap = colormaps["tab20"]
+    colors = {name: cmap(i % 20) for i, name in enumerate(class_names)}
+
+    fig, ax = plt.subplots(figsize=(12, 0.9 * len(rows) + 2))
+
+    for lec in schedule:
+        if lec.start_time is None or lec.classroom is None:
+            continue  # lecture could not be placed
+
+        key = lec.classroom if group_by == "classroom" else lec.teacher
+        y = row_index[key]
+        other = lec.teacher if group_by == "classroom" else lec.classroom
+
+        ax.broken_barh(
+            [(lec.start_time, lec.duration)], (y - 0.4, 0.8),
+            facecolors=colors[lec.class_name], edgecolor="black", alpha=0.85,
+        )
+        ax.text(
+            lec.start_time + lec.duration / 2, y,
+            f"{lec.class_name} #{lec.lecture_number}\n{other}",
+            ha="center", va="center", fontsize=8,
+        )
+
+    starts = [l.start_time for l in schedule if l.start_time is not None]
+    ends = [l.start_time + l.duration for l in schedule if l.start_time is not None]
+    ax.set_xlim(min(starts) - 0.5, max(ends) + 0.5)
+    ax.set_xticks(range(min(starts), max(ends) + 1))
+    ax.set_yticks(range(len(rows)))
+    ax.set_yticklabels(rows)
+    ax.invert_yaxis()
+    ax.set_xlabel("Hour")
+    ax.set_title(f"Schedule by {group_by}")
+    ax.grid(axis="x", linestyle="--", alpha=0.5)
+
+    handles = [plt.Rectangle((0, 0), 1, 1, color=colors[n]) for n in class_names]
+    ax.legend(handles, class_names, title="Class",
+              bbox_to_anchor=(1.01, 1), loc="upper left")
+
+    plt.tight_layout()
+    plt.show()

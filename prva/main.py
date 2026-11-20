@@ -64,8 +64,7 @@ def main():
     best_schedule = hf.chromosome_decode(solution, unassigned_lectures,
                                          classroom_names, teacher_names)
     print("best fitness:", fitness)
-    for lecture in best_schedule:
-        print(lecture)
+    hf.display_schedule(best_schedule, classroom_names, teacher_names)
 
 
 if __name__ == "__main__":
