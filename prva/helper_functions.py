@@ -146,6 +146,36 @@ def find_conflicting_lectures(chromosome, unassigned_lectures, classroom_hours):
     return bad_lectures
 
 
+def find_conflicting_lectures_fast(chromosome, unassigned_lectures, classroom_hours):
+    bad = set()
+    classroom_groups = {}
+    teacher_groups = {}
+
+    for i in range(len(unassigned_lectures)):
+        start = chromosome[3 * i]
+        end = start + unassigned_lectures[i].duration
+        classroom = chromosome[3 * i + 1]
+        teacher = chromosome[3 * i + 2]
+
+        open_time, close_time = classroom_hours[classroom]
+        if start < open_time or end > close_time:
+            bad.add(i)
+
+        classroom_groups.setdefault(classroom, []).append((start, end, i))
+        teacher_groups.setdefault(teacher, []).append((start, end, i))
+
+    for groups in (classroom_groups, teacher_groups):
+        for intervals in groups.values():
+            intervals.sort()
+            for a in range(len(intervals)):
+                for b in range(a + 1, len(intervals)):
+                    if intervals[b][0] >= intervals[a][1]:
+                        break
+                    bad.add(intervals[a][2])
+                    bad.add(intervals[b][2])
+    return sorted(bad)
+
+
 def search_free_slot(duration, teacher_indexes, classroom_hours, classroom_booked, teacher_booked):
     classroom_order = list(range(len(classroom_hours)))
     random.shuffle(classroom_order)
