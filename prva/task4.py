@@ -207,7 +207,9 @@ def generate_instance(root, name, spec):
 
 def generate_all(root):
     for name, spec in INSTANCES.items():
-        if not (root / name / "preferences.txt").exists():
+        required_files = ("classes.txt", "classrooms.txt", "teachers.txt", "preferences.txt")
+        instance_dir = root / name
+        if not all((instance_dir / filename).is_file() for filename in required_files):
             generate_instance(root, name, spec)
 
 
@@ -323,14 +325,22 @@ def run_hard(problem, config, seed, time_limit):
                                                   problem["classroom_hours"], problem["qualified"],
                                                   problem["gene_space"])
 
-    marks = []
-
-    def on_start(ga_instance):
-        marks.append(time.perf_counter() - start)
+    curve = []
+    times = []
 
     def on_generation(ga_instance):
-        marks.append(time.perf_counter() - start)
-        if marks[-1] > time_limit:
+        # PyGAD's best_solutions_fitness history is updated at the start of
+        # the next generation. Read the evaluated population here so fitness
+        # and elapsed time refer to the same completed generation.
+        best_fitness = float(np.max(ga_instance.last_generation_fitness))
+        violations = int(round(BASE_FITNESS / best_fitness - 1))
+        if curve:
+            violations = min(violations, curve[-1])
+        curve.append(violations)
+
+        elapsed = time.perf_counter() - start
+        times.append(elapsed)
+        if elapsed >= time_limit:
             return "stop"
 
     settings = dict(
@@ -346,7 +356,6 @@ def run_hard(problem, config, seed, time_limit):
         random_seed=seed,
         suppress_warnings=True,
         stop_criteria="reach_" + str(BASE_FITNESS),
-        on_start=on_start,
         on_generation=on_generation,
     )
     if population is not None:
@@ -366,20 +375,13 @@ def run_hard(problem, config, seed, time_limit):
     ga = pygad.GA(**settings)
     ga.run()
 
-    curve = []
-    for fitness in ga.best_solutions_fitness:
-        curve.append(int(round(BASE_FITNESS / fitness - 1)))
-    length = min(len(curve), len(marks))
-    curve = curve[:length]
-    times = marks[:length]
-
-    success = curve[-1] == 0
+    success = 0 in curve
     time_to_valid = None
     generations_to_valid = None
     if success:
         index = curve.index(0)
         time_to_valid = times[index]
-        generations_to_valid = index
+        generations_to_valid = index + 1
 
     return {
         "success": success,
@@ -436,7 +438,8 @@ def curves_of(results, use_time):
         if use_time:
             runs.append((np.array(result["times"]), np.array(result["curve"])))
         else:
-            runs.append((np.arange(len(result["curve"])), np.array(result["curve"])))
+            # The first value is recorded after generation 1 has completed.
+            runs.append((np.arange(1, len(result["curve"]) + 1), np.array(result["curve"])))
     return runs
 
 
@@ -478,9 +481,9 @@ def experiment_instances():
             generation_panels[title][label] = curves_of(runs, False)
             time_panels[title][label] = curves_of(runs, True)
 
-    plotting.plot_curve_panels(generation_panels, "Generation", "Violated hours (mean)",
+    plotting.plot_curve_panels(generation_panels, "Completed generation", "Hard-constraint penalty units (mean)",
                                ROOT_DIR / "task4_instances_generations.png")
-    plotting.plot_curve_panels(time_panels, "Elapsed time (s)", "Violated hours (mean)",
+    plotting.plot_curve_panels(time_panels, "Elapsed time (s)", "Hard-constraint penalty units (mean)",
                                ROOT_DIR / "task4_instances_time.png", use_time=True)
 
 
@@ -501,7 +504,7 @@ def experiment_ablation(name):
     time_panels = {"ablation on " + name: {}}
     for label, runs in results.items():
         time_panels["ablation on " + name][label] = curves_of(runs, True)
-    plotting.plot_curve_panels(time_panels, "Elapsed time (s)", "Violated hours (mean)",
+    plotting.plot_curve_panels(time_panels, "Elapsed time (s)", "Hard-constraint penalty units (mean)",
                                ROOT_DIR / "task4_ablation.png", use_time=True)
 
 
@@ -535,7 +538,7 @@ def experiment_sweeps(baseline_name, improved_name):
             print_hard_table(group_name + " on " + name, results)
             panels[group_name + " (" + name + ")"] = bar_panel(results)
 
-    plotting.plot_bar_panels(panels, "Mean final violated hours (label = valid runs)",
+    plotting.plot_bar_panels(panels, "Mean final hard-constraint penalty units (label = valid runs)",
                              ROOT_DIR / "task4_sweeps.png")
 
 
@@ -561,7 +564,7 @@ def experiment_failures():
         for label, runs in results.items():
             time_panels[name][label] = curves_of(runs, True)
 
-    plotting.plot_curve_panels(time_panels, "Elapsed time (s)", "Violated hours (mean)",
+    plotting.plot_curve_panels(time_panels, "Elapsed time (s)", "Hard-constraint penalty units (mean)",
                                ROOT_DIR / "task4_failures.png", use_time=True)
 
 
