@@ -1,0 +1,8 @@
+t01 {"likes": [9, 12], "dislikes": [12, 14]}
+t02 {"likes": [12, 16], "dislikes": [10, 12]}
+t03 {"likes": [13, 17], "dislikes": [8, 11]}
+t04 {"likes": [13, 16], "dislikes": [10, 13]}
+t05 {"likes": [9, 14], "dislikes": [16, 18]}
+t06 {"likes": [10, 15]}
+t07 {"likes": [12, 17]}
+t08 {"likes": [9, 14]}

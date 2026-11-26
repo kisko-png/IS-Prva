@@ -1,0 +1,14 @@
+t01 {"likes": [8, 13], "dislikes": [15, 17]}
+t02 {"likes": [14, 18], "dislikes": [8, 10]}
+t03 {"likes": [11, 16], "dislikes": [8, 10]}
+t04 {"likes": [14, 18], "dislikes": [10, 13]}
+t05 {"likes": [10, 15], "dislikes": [15, 17]}
+t06 {"likes": [15, 18], "dislikes": [8, 10]}
+t07 {"likes": [10, 13], "dislikes": [13, 16]}
+t08 {"likes": [13, 16], "dislikes": [9, 12]}
+t09 {"likes": [12, 17], "dislikes": [8, 10]}
+t10 {"likes": [15, 18], "dislikes": [9, 11]}
+t11 {"likes": [14, 17], "dislikes": [10, 13]}
+t12 {"likes": [9, 12], "dislikes": [13, 15]}
+t13 {"likes": [11, 15], "dislikes": [15, 18]}
+t14 {"likes": [9, 13], "dislikes": [15, 17]}
